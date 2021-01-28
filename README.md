@@ -1,1 +1,1 @@
-# wordpress_guided
+guided wordpress setup script that needs more polishing, run it as root.
