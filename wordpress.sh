@@ -1,21 +1,36 @@
 #!/bin/bash
 
-credentials() {
+password() {
 printf "\n\n"
-read -p "Enter mysql database name: " DBNAME
-read -p "Enter mysql database user name: " UNAME
-read -p "Enter mysql database user password: " PASS
+while true
+do
+read -p "Database user's password: " -s PASS1; printf "\n" 
+read -p "Retype password: " -s PASS2; printf "\n"
+if [[ $PASS1 != $PASS2 ]]; then
+	printf "\nSorry, passwords do not match, please try again.\n\n"
+	continue;
+else
+	printf "Password set successfully!\n\n"
+	break;
+fi
+done
+database
+}
 
-printf "\n\n"
-printf "db_name: $DBNAME\ndb_user: $UNAME\ndb_password: $PASS\n"
-printf "\n"
+database() {
+read -p "Database name: " DBNAME
+read -p "Database user name: " UNAME
+credentials
+}
+
+credentials() {
 while true
 do
 read -p "Are these credentials correct [Y/n] " CONFIRM
 case $CONFIRM in
-        n|N) credentials; break;;
+        n|N) database; break;;
         y|Y) mysql; break;;
-        *) echo 'Please enter y/n'      
+	*) printf "\nPlease enter Y/n\n"      
 esac
 done
 }
@@ -44,7 +59,7 @@ sudo mv wordpress/ /var/www/html
 cp /etc/nginx/sites-available/default .
 sudo rm /etc/nginx/sites-available/default
 sed -i 's/root \/var\/www\/html;/root \/var\/www\/html\/wordpress;/g' default
-sed -i 's/index index.html index.htm index.nginx-debian.html;/index index.html index.htm index.nginx-debian.html index.php;/g' default
+sed -i 's/index.nginx-debian.html;/index.nginx-debian.html index.php;/g' default
 sed -i "56,61 s/$(echo a | tr 'a' '\t')//" default
 sed -i "63 s/$(echo a | tr 'a' '\t')//" default
 sed -i "68,70 s/$(echo a | tr 'a' '\t')//" default
@@ -57,5 +72,4 @@ sudo service nginx reload
 yes | sudo apt install nginx mysql-server php-fpm php-mysql
 wget https://wordpress.org/latest.tar.gz
 tar -xvf latest.tar.gz
-credentials
-
+password
